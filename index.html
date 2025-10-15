@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Alkana - Game Interaktif Kimia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #2b6cb0;
+            --accent: #3182ce;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --success: #48bb78;
+            --danger: #f56565;
+            --carbon: #3182ce; /* Biru untuk karbon */
+            --hydrogen: #ffffff; /* Putih untuk hidrogen */
+            --bond: #a0aec0;
+            --background: linear-gradient(135deg, #1a202c, #2d3748);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background: var(--background);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 180px);
+        }
+        
+        .slide {
+            display: none;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            text-align: center;
+        }
+        
+        .slide.active {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .slide-title {
+            color: var(--light);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .slide-content {
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary), #2c5aa0);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .nav-btn {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--light);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .nav-btn:hover {
+            background-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Karakter Alki */
+        .alki-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .alki {
+            width: 80px;
+            height: 80px;
+            background: var(--carbon);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            animation: bounce 2s infinite;
+            position: relative;
+        }
+        
+        .alki::after {
+            content: "Alki";
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: white;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .alki-message {
+            position: absolute;
+            bottom: 100px;
+            right: 0;
+            background: rgba(255,255,255,0.9);
+            color: var(--dark);
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 200px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .alki-message::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            border-width: 10px;
+            border-style: solid;
+            border-color: rgba(255,255,255,0.9) transparent transparent transparent;
+        }
+        
+        .alki:hover .alki-message {
+            display: block;
+        }
+        
+        /* Molekul dan Struktur */
+        .molecule-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .molecule {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        
+        .atom {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .carbon-atom {
+            width: 60px;
+            height: 60px;
+            background: var(--carbon);
+            color: white;
+            z-index: 10;
+        }
+        
+        .hydrogen-atom {
+            width: 40px;
+            height: 40px;
+            background: var(--hydrogen);
+            color: var(--dark);
+            animation: hydrogenFloat 3s infinite ease-in-out;
+            border: 2px solid #e2e8f0;
+        }
+        
+        @keyframes hydrogenFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .bond {
+            position: absolute;
+            background: var(--bond);
+            transform-origin: 0 0;
+        }
+        
+        /* Game Elements */
+        .game-container {
+            margin: 2rem 0;
+        }
+        
+        .level-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 1.5rem 0;
+        }
+        
+        .level-btn {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .level-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-5px);
+        }
+        
+        .level-btn.active {
+            background: var(--accent);
+        }
+        
+        .game-area {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            min-height: 300px;
+        }
+        
+        .drag-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+        
+        .drag-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: move;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .drag-item:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .drop-area {
+            min-height: 100px;
+            border: 2px dashed var(--accent);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        
+        .option {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .option:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .option.selected {
+            background: var(--accent);
+        }
+        
+        .feedback {
+            margin-top: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+            display: block;
+            animation: pulse 0.5s;
+        }
+        
+        .feedback.incorrect {
+            background: rgba(245, 101, 101, 0.2);
+            color: var(--danger);
+            display: block;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .score-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Table Styles */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .info-table th, .info-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-table th {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .info-table tr:nth-child(even) {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        /* Reflection Area */
+        .reflection-area {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .reflection-input {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            padding: 10px;
+            color: white;
+            margin: 1rem 0;
+        }
+        
+        /* Quiz Styles */
+        .quiz-container {
+            margin: 2rem 0;
+        }
+        
+        .quiz-question {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Visual Builder */
+        .visual-builder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .molecule-builder {
+            position: relative;
+            width: 350px;
+            height: 250px;
+            margin: 1rem 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .builder-controls {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        
+        .control-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: var(--accent);
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .level-selector {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .molecule {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .molecule-builder {
+                width: 300px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Karakter Alki animasi di menu utama -->
+    <div class="alki-container" style="display: flex; justify-content: center; margin-top: 20px;">
+        <div class="alki" style="width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #333, #666); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); animation: bounce-alki 2s infinite alternate; position: relative; font-size: 3rem; color: #fff;">
+            C
+            <span style="position: absolute; bottom: 10px; right: 12px; font-size: 1.1rem; color: #4a9eff;">Alki</span>
+        </div>
+    </div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">⚗️</div>
+                    <h1>Petualangan Alkana</h1>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <!-- SLIDE 1 - Pembuka -->
+            <section id="slide1" class="slide active">
+                <h2 class="slide-title">Selamat Datang di Dunia Alkana!</h2>
+                <div class="slide-content">
+                    <div class="molecule-container">
+                        <div class="alki" style="width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #333, #666); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); animation: bounce-alki 2s infinite alternate; position: relative; font-size: 3rem; color: #fff; margin: 0 auto 20px auto;">
+                            C
+                            <span style="position: absolute; bottom: 10px; right: 12px; font-size: 1.1rem; color: #4a9eff;">Alki</span>
+                        </div>
+                        <div class="molecule">
+                            <div class="atom carbon-atom" style="top: 120px; left: 120px;">C</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 120px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 120px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 60px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 180px;">H</div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(0deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(90deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(180deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(270deg);"></div>
+                        </div>
+                    </div>
+                    <p>Hai, sobat kimia! Aku Alki, atom karbon yang suka berikatan. Hari ini kita akan bermain sambil mengenal dunia alkana!</p>
+                </div>
+                <button class="btn btn-primary" onclick="showSlide(2)">Mulai Petualangan</button>
+            </section>
+    <style>
+    @keyframes bounce-alki {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-20px); }
+    }
+    </style>
+            
+            <!-- SLIDE 2 - Apa Itu Alkana? -->
+            <section id="slide2" class="slide">
+                <h2 class="slide-title">Apa Itu Alkana?</h2>
+                <div class="slide-content">
+                    <p>Alkana adalah keluarga hidrokarbon jenuh, semua ikatannya tunggal! Kami punya banyak saudara: metana, etana, propana...</p>
+                    
+                    <div class="molecule-container">
+                        <div class="molecule" onclick="showMoleculeInfo('metana')">
+                            <div class="atom carbon-atom" style="top: 120px; left: 120px;">C</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 120px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 120px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 60px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 180px;">H</div>
+                            
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(0deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(90deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(180deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 120px; transform: rotate(270deg);"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="molecule-info" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3 id="molecule-name"></h3>
+                        <p id="molecule-formula"></p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(1)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(3)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 3 - Contoh Alkana Rantai Lurus -->
+            <section id="slide3" class="slide">
+                <h2 class="slide-title">Contoh Alkana Rantai Lurus</h2>
+                <div class="slide-content">
+                    <p>Lihat! Kalau aku menambah 1 karbon, aku butuh 2 hidrogen lagi!</p>
+                    
+                    <div class="molecule-container">
+                        <div class="molecule">
+                            <!-- Metana -->
+                            <div class="atom carbon-atom" style="top: 120px; left: 60px;">C</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 60px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 60px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 20px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 100px;">H</div>
+                            
+                            <!-- Etana -->
+                            <div class="atom carbon-atom" style="top: 120px; left: 140px;">C</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 140px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 140px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 180px;">H</div>
+                            
+                            <!-- Propana -->
+                            <div class="atom carbon-atom" style="top: 120px; left: 220px;">C</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 220px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 220px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 120px; left: 260px;">H</div>
+                            
+                            <!-- Ikatan -->
+                            <div class="bond" style="width: 80px; height: 2px; top: 120px; left: 100px; transform: rotate(0deg);"></div>
+                            <div class="bond" style="width: 80px; height: 2px; top: 120px; left: 180px; transform: rotate(0deg);"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="options">
+                        <div class="option" onclick="showMoleculeDetail('metana')">
+                            <h3>Metana</h3>
+                            <p>1 Atom C</p>
+                            <p>CH₄</p>
+                        </div>
+                        <div class="option" onclick="showMoleculeDetail('etana')">
+                            <h3>Etana</h3>
+                            <p>2 Atom C</p>
+                            <p>C₂H₆</p>
+                        </div>
+                        <div class="option" onclick="showMoleculeDetail('propana')">
+                            <h3>Propana</h3>
+                            <p>3 Atom C</p>
+                            <p>C₃H₈</p>
+                        </div>
+                    </div>
+                    
+                    <div id="molecule-detail" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3 id="detail-name"></h3>
+                        <p id="detail-info"></p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(2)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(4)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 4 - Eksperimen Visual: Tambah & Kurangi Atom Karbon -->
+            <section id="slide4" class="slide">
+                <h2 class="slide-title">Eksperimen Visual: Tambah & Kurangi Atom Karbon</h2>
+                <div class="slide-content">
+                    <p>Ternyata setiap kali karbon bertambah satu, hidrogennya bertambah dua!</p>
+                    
+                    <div class="visual-builder">
+                        <div class="molecule-builder" id="experiment-molecule">
+                            <!-- Molekul akan di-generate oleh JavaScript -->
+                        </div>
+                        
+                        <div class="builder-controls">
+                            <button class="control-btn" onclick="changeCarbonCount(-1)"><i class="fas fa-minus"></i> Kurangi C</button>
+                            <span style="font-size: 1.2rem; font-weight: bold;">Jumlah atom C: <span id="carbon-count">1</span></span>
+                            <button class="control-btn" onclick="changeCarbonCount(1)"><i class="fas fa-plus"></i> Tambah C</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chain-info">
+                        <p id="alkana-name">Nama: Metana</p>
+                        <p id="alkana-formula">Rumus Molekul: CH₄</p>
+                        <p>Rumus Umum: CₙH₂ₙ₊₂ → C₁H₄</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(3)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(5)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 5 - Game Ronde 1: Alkana Rantai Lurus -->
+            <section id="slide5" class="slide">
+                <h2 class="slide-title">Game Ronde 1: Alkana Rantai Lurus</h2>
+                <div class="slide-content">
+                    <p>Pilih level untuk memulai petualangan!</p>
+                    
+                    <div class="level-selector">
+                        <div class="level-btn" onclick="startLevel(1)">Level 1</div>
+                        <div class="level-btn" onclick="startLevel(2)">Level 2</div>
+                        <div class="level-btn" onclick="startLevel(3)">Level 3</div>
+                        <div class="level-btn" onclick="startLevel(4)">Level 4</div>
+                        <div class="level-btn" onclick="startLevel(5)">Level 5</div>
+                    </div>
+                    
+                    <div class="game-area" id="game-area">
+                        <!-- Area game akan diisi oleh JavaScript -->
+                    </div>
+                    
+                    <div class="score-display" id="score-display" style="display: none;">
+                        Skor: <span id="score">0</span>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(4)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(6)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 6 - Kesimpulan Ronde 1 -->
+            <section id="slide6" class="slide">
+                <h2 class="slide-title">Kesimpulan Ronde 1</h2>
+                <div class="slide-content">
+                    <p>Dari permainan tadi, apa yang kamu temukan?</p>
+                    <p>Setiap bertambah 1 atom C, berapa atom H yang ikut bertambah?</p>
+                    
+                    <div class="reflection-area">
+                        <textarea class="reflection-input" id="reflection1" placeholder="Tulis kesimpulanmu di sini..."></textarea>
+                        <button class="btn" onclick="showConclusion()">Tampilkan Kesimpulan</button>
+                    </div>
+                    
+                    <div id="conclusion" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3>Rumus umum alkana adalah CₙH₂ₙ₊₂</h3>
+                        <p>Dimana n adalah jumlah atom karbon dalam molekul.</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(5)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(7)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 7 - Ronde 2: Alkana Bercabang -->
+            <section id="slide7" class="slide">
+                <h2 class="slide-title">Ronde 2: Alkana Bercabang</h2>
+                <div class="slide-content">
+                    <p>Sekarang kita naik level! Karbon bisa bercabang juga, loh!</p>
+                    
+                    <div class="molecule-container">
+                        <div class="molecule">
+                            <!-- Metilpropana -->
+                            <div class="atom carbon-atom" style="top: 120px; left: 80px;">C</div>
+                            <div class="atom carbon-atom" style="top: 120px; left: 140px;">C</div>
+                            <div class="atom carbon-atom" style="top: 120px; left: 200px;">C</div>
+                            <div class="atom carbon-atom" style="top: 60px; left: 140px;">C</div> <!-- Cabang -->
+                            
+                            <!-- Ikatan utama -->
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 110px; transform: rotate(0deg);"></div>
+                            <div class="bond" style="width: 60px; height: 2px; top: 120px; left: 170px; transform: rotate(0deg);"></div>
+                            
+                            <!-- Ikatan cabang -->
+                            <div class="bond" style="width: 60px; height: 2px; top: 90px; left: 140px; transform: rotate(90deg);"></div>
+                            
+                            <!-- Atom hidrogen (disederhanakan) -->
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 80px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 80px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 60px; left: 200px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 180px; left: 200px;">H</div>
+                            <div class="atom hydrogen-atom" style="top: 30px; left: 140px;">H</div>
+                        </div>
+                    </div>
+                    
+                    <div class="options">
+                        <div class="option" onclick="showBranchedInfo('metilpropana')">
+                            <h3>Metilpropana</h3>
+                            <p>C₄H₁₀</p>
+                        </div>
+                        <div class="option" onclick="showBranchedInfo('etilbutana')">
+                            <h3>Etilbutana</h3>
+                            <p>C₆H₁₄</p>
+                        </div>
+                    </div>
+                    
+                    <div id="branched-info" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3 id="branched-name"></h3>
+                        <p id="branched-detail"></p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(6)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(8)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 8 - Coba Tambah & Kurangi Lagi -->
+            <section id="slide8" class="slide">
+                <h2 class="slide-title">Coba Tambah & Kurangi Lagi</h2>
+                <div class="slide-content">
+                    <p>Kalau aku tambahkan karbon di samping, jadilah cabang metil!</p>
+                    
+                    <div class="visual-builder">
+                        <div class="molecule-builder" id="branched-experiment">
+                            <!-- Molekul bercabang akan di-generate oleh JavaScript -->
+                        </div>
+                        
+                        <div class="builder-controls">
+                            <button class="control-btn" onclick="changeBranchedCarbon('main', -1)"><i class="fas fa-minus"></i> Kurangi C Utama</button>
+                            <button class="control-btn" onclick="changeBranchedCarbon('main', 1)"><i class="fas fa-plus"></i> Tambah C Utama</button>
+                            <button class="control-btn" onclick="changeBranchedCarbon('branch', 1)"><i class="fas fa-plus"></i> Tambah Cabang</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chain-info">
+                        <p id="branched-alkana-name">Nama: Metilpropana</p>
+                        <p id="branched-alkana-formula">Rumus Molekul: C₄H₁₀</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(7)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(9)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 9 - Game Ronde 2: Alkana Bercabang -->
+            <section id="slide9" class="slide">
+                <h2 class="slide-title">Game Ronde 2: Alkana Bercabang</h2>
+                <div class="slide-content">
+                    <p>Pilih level untuk melanjutkan petualangan!</p>
+                    
+                    <div class="level-selector">
+                        <div class="level-btn" onclick="startBranchedLevel(1)">Level 1</div>
+                        <div class="level-btn" onclick="startBranchedLevel(2)">Level 2</div>
+                        <div class="level-btn" onclick="startBranchedLevel(3)">Level 3</div>
+                        <div class="level-btn" onclick="startBranchedLevel(4)">Level 4</div>
+                        <div class="level-btn" onclick="startBranchedLevel(5)">Level 5</div>
+                    </div>
+                    
+                    <div class="game-area" id="branched-game-area">
+                        <!-- Area game akan diisi oleh JavaScript -->
+                    </div>
+                    
+                    <div class="score-display" id="branched-score-display" style="display: none;">
+                        Skor: <span id="branched-score">0</span>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(8)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(10)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 10 - Refleksi Ronde 2 -->
+            <section id="slide10" class="slide">
+                <h2 class="slide-title">Refleksi Ronde 2</h2>
+                <div class="slide-content">
+                    <p>Bagaimana cara menentukan rantai utama dan cabang?</p>
+                    <p>Apa perbedaan nama antara rantai lurus dan bercabang?</p>
+                    
+                    <div class="reflection-area">
+                        <textarea class="reflection-input" id="reflection2" placeholder="Tulis kesimpulanmu di sini..."></textarea>
+                        <button class="btn" onclick="showBranchedConclusion()">Tampilkan Kesimpulan</button>
+                    </div>
+                    
+                    <div id="branched-conclusion" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3>Nama alkana bercabang = posisi cabang + nama cabang + nama rantai utama</h3>
+                        <p>Contoh: 2-metilpropana, 3-etilheksana</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(9)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(11)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 11 - Catatan Penting -->
+            <section id="slide11" class="slide">
+                <h2 class="slide-title">Catatan Penting</h2>
+                <div class="slide-content">
+                    <table class="info-table">
+                        <thead>
+                            <tr>
+                                <th>Jumlah C</th>
+                                <th>Nama</th>
+                                <th>Rumus</th>
+                                <th>Bentuk</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Metana</td>
+                                <td>CH₄</td>
+                                <td>Lurus</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Propana</td>
+                                <td>C₃H₈</td>
+                                <td>Lurus</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Metilpropana</td>
+                                <td>C₄H₁₀</td>
+                                <td>Bercabang</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="summary">
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-check"></i></div>
+                            <div>
+                                <h4>Alkana = hidrokarbon jenuh, ikatan tunggal</h4>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-check"></i></div>
+                            <div>
+                                <h4>Rumus umum: CₙH₂ₙ₊₂</h4>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-check"></i></div>
+                            <div>
+                                <h4>Rantai lurus & bercabang punya pola penamaan berbeda</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(10)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(12)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 12 - Kuis Akhir -->
+            <section id="slide11b" class="slide">
+                <h2 class="slide-title">Tabel Interaktif Rumus Umum Alkana</h2>
+                <div class="slide-content">
+                    <div class="visual-area">
+                        <h3>Eksplorasi Rumus Umum Alkana</h3>
+                        <div style="display: flex; align-items: center; gap: 20px; justify-content: center;">
+                            <button class="btn" id="decrease-c">-</button>
+                            <div id="alkana-table-visual"></div>
+                            <button class="btn" id="increase-c">+</button>
+                        </div>
+                        <div style="margin-top: 1em; text-align: center;">
+                            <span id="alkana-table-name"></span> | <span id="alkana-table-formula"></span>
+                        </div>
+                    </div>
+                    <div class="text-area">
+                        <p>Gunakan tombol + dan - untuk menambah/mengurangi atom karbon. Visualisasi dan rumus akan berubah otomatis sesuai jumlah C dan H.</p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(11)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(12)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+
+            <section id="slide12" class="slide">
+                <h2 class="slide-title">Kuis Akhir (Visual)</h2>
+                <div class="slide-content">
+                    <div class="quiz-container" id="final-quiz">
+                        <!-- Kuis visual akan diisi oleh JavaScript -->
+                    </div>
+                    <div class="score-display" id="final-score-display" style="display: none;">
+                        Skor Akhir: <span id="final-score">0</span>/5
+                    </div>
+                    <div id="final-feedback" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <h3>Hebat! Kamu sudah menaklukkan dunia alkana 🔥</h3>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(11b)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="nav-btn" onclick="showSlide(13)">Selanjutnya <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </section>
+            
+            <!-- SLIDE 13 - Penutup dan Evaluasi Kelompok -->
+            <section id="slide13" class="slide">
+                <h2 class="slide-title">Penutup dan Evaluasi Kelompok</h2>
+                <div class="slide-content">
+                    <p>Diskusikan dengan kelompokmu — tulis 3 hal yang kamu pelajari hari ini.</p>
+                    
+                    <div class="reflection-area">
+                        <textarea class="reflection-input" id="group-reflection" placeholder="Tulis 3 hal yang telah dipelajari..."></textarea>
+                        <button class="btn" onclick="finishAdventure()">Selesai</button>
+                    </div>
+                    
+                    <div id="final-message" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, var(--secondary), var(--accent)); color: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                        <h3>Dari satu karbon kecil, kamu bisa membangun dunia besar kimia!</h3>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-btn" onclick="showSlide(12)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                    <button class="btn" onclick="showSlide(1)"><i class="fas fa-redo"></i> Mulai Lagi</button>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>Media Interaktif: Petualangan Alkana - Kimia Kelas XI SMA/MA</p>
+            <p>Dibuat dengan ❤️ untuk pembelajaran kimia yang menyenangkan</p>
+        </div>
+    </footer>
+
+    <script>
+        // Data untuk progress bar
+        const slideProgress = {
+            'slide1': 0,
+            'slide2': 8,
+            'slide3': 15,
+            'slide4': 23,
+            'slide5': 31,
+            'slide6': 38,
+            'slide7': 46,
+            'slide8': 54,
+            'slide9': 62,
+            'slide10': 69,
+            'slide11': 77,
+            'slide12': 85,
+            'slide13': 100
+        };
+        
+        // Data untuk kuis akhir
+        const finalQuiz = [
+            {
+                question: "Rumus umum alkana?",
+                options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂", "CₙH₂ₙ₊₁"],
+                correct: 1
+            },
+            {
+                question: "Nama senyawa dengan 5 atom C?",
+                options: ["Butana", "Pentana", "Heksana", "Heptana"],
+                correct: 1
+            },
+            {
+                question: "Struktur bercabang dengan cabang metil?",
+                options: ["Metana", "Etana", "Metilpropana", "Propana"],
+                correct: 2
+            },
+            {
+                question: "Tentukan nama dari gambar molekul (C₃H₈)?",
+                options: ["Metana", "Etana", "Propana", "Butana"],
+                correct: 2
+            },
+            {
+                question: "Lengkapi kalimat: 'Setiap penambahan 1C, hidrogen bertambah ___.'",
+                options: ["1", "2", "3", "4"],
+                correct: 1
+            }
+        ];
+        
+        // Variabel global
+        let currentCarbonCount = 1;
+        let currentBranchedCarbon = {
+            main: 3,
+            branches: 1
+        };
+        let currentLevel = 0;
+        let gameScore = 0;
+        let branchedGameScore = 0;
+        let finalScore = 0;
+        let currentQuizQuestion = 0;
+        
+        // Fungsi untuk menampilkan slide tertentu
+        function showSlide(slideNumber) {
+            // Sembunyikan semua slide
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Tampilkan slide yang dipilih
+            document.getElementById(`slide${slideNumber}`).classList.add('active');
+            
+            // Update progress bar
+            updateProgressBar(`slide${slideNumber}`);
+            
+            // Jika slide 4, render molekul eksperimen
+            if (slideNumber === 4) {
+                renderExperimentMolecule();
+            }
+            
+            // Jika slide 8, render molekul bercabang
+            if (slideNumber === 8) {
+                renderBranchedExperimentMolecule();
+            }
+            
+            // Jika slide 11b, render tabel interaktif alkana
+            if (slideNumber === '11b' || slideNumber === 11.5) {
+                renderAlkanaTableInteractive();
+            }
+            // Jika slide 12, render kuis visual
+            if (slideNumber === 12) {
+                renderFinalQuizVisual();
+            }
+        // Tabel interaktif rumus umum alkana
+        function renderAlkanaTableInteractive() {
+            let c = window.alkanaTableC || 1;
+            const minC = 1, maxC = 8;
+            const visualDiv = document.getElementById('alkana-table-visual');
+            const nameSpan = document.getElementById('alkana-table-name');
+            const formulaSpan = document.getElementById('alkana-table-formula');
+            function update() {
+                visualDiv.innerHTML = '';
+                // SVG visualisasi rantai
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', 80*c+40);
+                svg.setAttribute('height', 120);
+                // Rantai karbon
+                for (let i=0; i<c; i++) {
+                    const cx = 40 + i*80;
+                    // Atom C
+                    const cCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    cCircle.setAttribute('cx', cx);
+                    cCircle.setAttribute('cy', 60);
+                    cCircle.setAttribute('r', 22);
+                    cCircle.setAttribute('fill', '#333');
+                    cCircle.setAttribute('stroke', '#fff');
+                    cCircle.setAttribute('stroke-width', 3);
+                    svg.appendChild(cCircle);
+                    // Label C
+                    const cText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    cText.setAttribute('x', cx);
+                    cText.setAttribute('y', 66);
+                    cText.setAttribute('text-anchor', 'middle');
+                    cText.setAttribute('font-size', '1.5rem');
+                    cText.setAttribute('fill', '#fff');
+                    cText.textContent = 'C';
+                    svg.appendChild(cText);
+                    // Ikatan antar C
+                    if (i>0) {
+                        const bond = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        bond.setAttribute('x1', cx-80);
+                        bond.setAttribute('y1', 60);
+                        bond.setAttribute('x2', cx);
+                        bond.setAttribute('y2', 60);
+                        bond.setAttribute('stroke', '#fff');
+                        bond.setAttribute('stroke-width', 5);
+                        svg.appendChild(bond);
+                    }
+                    // Hidrogen (2 atas, 2 bawah di ujung, 1 atas 1 bawah di tengah)
+                    if (i===0 || i===c-1) {
+                        // Ujung
+                        for (let j=0;j<2;j++) {
+                            const hy = 30 + j*60;
+                            const hCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            hCircle.setAttribute('cx', cx);
+                            hCircle.setAttribute('cy', hy);
+                            hCircle.setAttribute('r', 12);
+                            hCircle.setAttribute('fill', '#4a9eff');
+                            hCircle.setAttribute('stroke', '#fff');
+                            hCircle.setAttribute('stroke-width', 2);
+                            svg.appendChild(hCircle);
+                            const hText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            hText.setAttribute('x', cx);
+                            hText.setAttribute('y', hy+5);
+                            hText.setAttribute('text-anchor', 'middle');
+                            hText.setAttribute('font-size', '1rem');
+                            hText.setAttribute('fill', '#fff');
+                            hText.textContent = 'H';
+                            svg.appendChild(hText);
+                        }
+                    } else {
+                        // Tengah
+                        for (let j=0;j<1;j++) {
+                            for (let k=0;k<2;k++) {
+                                const hy = 30 + k*60;
+                                const hCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                                hCircle.setAttribute('cx', cx);
+                                hCircle.setAttribute('cy', hy);
+                                hCircle.setAttribute('r', 12);
+                                hCircle.setAttribute('fill', '#4a9eff');
+                                hCircle.setAttribute('stroke', '#fff');
+                                hCircle.setAttribute('stroke-width', 2);
+                                svg.appendChild(hCircle);
+                                const hText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                hText.setAttribute('x', cx);
+                                hText.setAttribute('y', hy+5);
+                                hText.setAttribute('text-anchor', 'middle');
+                                hText.setAttribute('font-size', '1rem');
+                                hText.setAttribute('fill', '#fff');
+                                hText.textContent = 'H';
+                                svg.appendChild(hText);
+                            }
+                        }
+                    }
+                }
+                visualDiv.appendChild(svg);
+                // Info
+                const names = ["Metana","Etana","Propana","Butana","Pentana","Heksana","Heptana","Oktana"];
+                nameSpan.textContent = names[c-1] || `Alkana C${c}`;
+                const h = 2*c+2;
+                formulaSpan.textContent = `C${c}H${h}`;
+            }
+            update();
+            document.getElementById('increase-c').onclick = ()=>{ if(c<maxC){window.alkanaTableC=++c;update();}};
+            document.getElementById('decrease-c').onclick = ()=>{ if(c>minC){window.alkanaTableC=--c;update();}};
+        }
+
+        // Kuis visual interaktif
+        function renderFinalQuizVisual() {
+            const quizDiv = document.getElementById('final-quiz');
+            quizDiv.innerHTML = '';
+            // Soal 1: Rumus umum alkana (pilihan visual)
+            const q1 = document.createElement('div');
+            q1.className = 'question';
+            q1.innerHTML = '1. Pilih rumus umum alkana:';
+            const opts1 = ['CₙH₂ₙ','CₙH₂ₙ₊₂','CₙH₂ₙ₋₂','CₙH₂ₙ₊₁'];
+            const correct1 = 1;
+            const optDiv1 = document.createElement('div');
+            optDiv1.className = 'options';
+            opts1.forEach((o,i)=>{
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = o;
+                btn.onclick = ()=>selectQuizAnswer(0,i,correct1);
+                optDiv1.appendChild(btn);
+            });
+            quizDiv.appendChild(q1);
+            quizDiv.appendChild(optDiv1);
+            // Soal 2: Nama senyawa dengan 5 atom C (pilihan visual)
+            const q2 = document.createElement('div');
+            q2.className = 'question';
+            q2.innerHTML = '2. Nama senyawa dengan 5 atom C:';
+            const opts2 = ['Butana','Pentana','Heksana','Heptana'];
+            const correct2 = 1;
+            const optDiv2 = document.createElement('div');
+            optDiv2.className = 'options';
+            opts2.forEach((o,i)=>{
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = o;
+                btn.onclick = ()=>selectQuizAnswer(1,i,correct2);
+                optDiv2.appendChild(btn);
+            });
+            quizDiv.appendChild(q2);
+            quizDiv.appendChild(optDiv2);
+            // Soal 3: Struktur bercabang dengan cabang metil (pilihan visual)
+            const q3 = document.createElement('div');
+            q3.className = 'question';
+            q3.innerHTML = '3. Pilih struktur bercabang dengan cabang metil:';
+            const optDiv3 = document.createElement('div');
+            optDiv3.className = 'options';
+            // Visual: 2 struktur SVG, satu lurus, satu bercabang
+            [false,true].forEach((isBranched,i)=>{
+                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+                svg.setAttribute('width',180);
+                svg.setAttribute('height',100);
+                // Rantai utama
+                for(let j=0;j<3;j++){
+                    const cx=40+j*50,cy=50;
+                    const cCircle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+                    cCircle.setAttribute('cx',cx);
+                    cCircle.setAttribute('cy',cy);
+                    cCircle.setAttribute('r',18);
+                    cCircle.setAttribute('fill','#333');
+                    cCircle.setAttribute('stroke','#fff');
+                    cCircle.setAttribute('stroke-width',2);
+                    svg.appendChild(cCircle);
+                    const cText=document.createElementNS('http://www.w3.org/2000/svg','text');
+                    cText.setAttribute('x',cx);
+                    cText.setAttribute('y',cy+6);
+                    cText.setAttribute('text-anchor','middle');
+                    cText.setAttribute('font-size','1.2rem');
+                    cText.setAttribute('fill','#fff');
+                    cText.textContent='C';
+                    svg.appendChild(cText);
+                    if(j>0){
+                        const bond=document.createElementNS('http://www.w3.org/2000/svg','line');
+                        bond.setAttribute('x1',cx-50);
+                        bond.setAttribute('y1',cy);
+                        bond.setAttribute('x2',cx);
+                        bond.setAttribute('y2',cy);
+                        bond.setAttribute('stroke','#fff');
+                        bond.setAttribute('stroke-width',4);
+                        svg.appendChild(bond);
+                    }
+                }
+                // Cabang metil
+                if(isBranched){
+                    const branchC=document.createElementNS('http://www.w3.org/2000/svg','circle');
+                    branchC.setAttribute('cx',90);
+                    branchC.setAttribute('cy',20);
+                    branchC.setAttribute('r',14);
+                    branchC.setAttribute('fill','#333');
+                    branchC.setAttribute('stroke','#fff');
+                    branchC.setAttribute('stroke-width',2);
+                    svg.appendChild(branchC);
+                    const branchText=document.createElementNS('http://www.w3.org/2000/svg','text');
+                    branchText.setAttribute('x',90);
+                    branchText.setAttribute('y',26);
+                    branchText.setAttribute('text-anchor','middle');
+                    branchText.setAttribute('font-size','1rem');
+                    branchText.setAttribute('fill','#fff');
+                    branchText.textContent='C';
+                    svg.appendChild(branchText);
+                    const branchBond=document.createElementNS('http://www.w3.org/2000/svg','line');
+                    branchBond.setAttribute('x1',90);
+                    branchBond.setAttribute('y1',50);
+                    branchBond.setAttribute('x2',90);
+                    branchBond.setAttribute('y2',20);
+                    branchBond.setAttribute('stroke','#fff');
+                    branchBond.setAttribute('stroke-width',3);
+                    svg.appendChild(branchBond);
+                }
+                const btn=document.createElement('button');
+                btn.className='option';
+                btn.appendChild(svg);
+                btn.onclick=()=>selectQuizAnswer(2,i,1);
+                optDiv3.appendChild(btn);
+            });
+            quizDiv.appendChild(q3);
+            quizDiv.appendChild(optDiv3);
+            // Soal 4: Nama dari gambar molekul (SVG visual)
+            const q4 = document.createElement('div');
+            q4.className = 'question';
+            q4.innerHTML = '4. Tentukan nama dari gambar molekul berikut:';
+            const svg4 = document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg4.setAttribute('width',180);
+            svg4.setAttribute('height',100);
+            for(let j=0;j<3;j++){
+                const cx=40+j*50,cy=50;
+                const cCircle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+                cCircle.setAttribute('cx',cx);
+                cCircle.setAttribute('cy',cy);
+                cCircle.setAttribute('r',18);
+                cCircle.setAttribute('fill','#333');
+                cCircle.setAttribute('stroke','#fff');
+                cCircle.setAttribute('stroke-width',2);
+                svg4.appendChild(cCircle);
+                const cText=document.createElementNS('http://www.w3.org/2000/svg','text');
+                cText.setAttribute('x',cx);
+                cText.setAttribute('y',cy+6);
+                cText.setAttribute('text-anchor','middle');
+                cText.setAttribute('font-size','1.2rem');
+                cText.setAttribute('fill','#fff');
+                cText.textContent='C';
+                svg4.appendChild(cText);
+                if(j>0){
+                    const bond=document.createElementNS('http://www.w3.org/2000/svg','line');
+                    bond.setAttribute('x1',cx-50);
+                    bond.setAttribute('y1',cy);
+                    bond.setAttribute('x2',cx);
+                    bond.setAttribute('y2',cy);
+                    bond.setAttribute('stroke','#fff');
+                    bond.setAttribute('stroke-width',4);
+                    svg4.appendChild(bond);
+                }
+            }
+            const optDiv4 = document.createElement('div');
+            optDiv4.className = 'options';
+            ['Metana','Etana','Propana','Butana'].forEach((o,i)=>{
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = o;
+                btn.onclick = ()=>selectQuizAnswer(3,i,2);
+                optDiv4.appendChild(btn);
+            });
+            quizDiv.appendChild(q4);
+            quizDiv.appendChild(svg4);
+            quizDiv.appendChild(optDiv4);
+            // Soal 5: Drag & drop visual
+            const q5 = document.createElement('div');
+            q5.className = 'question';
+            q5.innerHTML = '5. Drag rumus ke nama yang benar:';
+            const dragArea = document.createElement('div');
+            dragArea.className = 'drag-area';
+            dragArea.style.display = 'flex';
+            dragArea.style.gap = '20px';
+            const draggables = [
+                {text:'C₄H₁₀',name:'Butana'},
+                {text:'C₃H₈',name:'Propana'}
+            ];
+            draggables.forEach((d,i)=>{
+                const drag = document.createElement('div');
+                drag.className = 'drag-item';
+                drag.textContent = d.text;
+                drag.draggable = true;
+                drag.dataset.idx = i;
+                drag.ondragstart = e => e.dataTransfer.setData('text/plain',i);
+                dragArea.appendChild(drag);
+            });
+            const dropArea = document.createElement('div');
+            dropArea.className = 'drop-area';
+            dropArea.style.display = 'flex';
+            dropArea.style.gap = '20px';
+            ['Butana','Propana'].forEach((n,i)=>{
+                const drop = document.createElement('div');
+                drop.className = 'drop-target';
+                drop.textContent = n;
+                drop.style.minWidth = '80px';
+                drop.style.minHeight = '40px';
+                drop.style.background = 'rgba(255,255,255,0.1)';
+                drop.style.border = '2px dashed #fff';
+                drop.style.borderRadius = '8px';
+                drop.style.display = 'flex';
+                drop.style.alignItems = 'center';
+                drop.style.justifyContent = 'center';
+                drop.ondragover = e => e.preventDefault();
+                drop.ondrop = e => {
+                    e.preventDefault();
+                    const idx = e.dataTransfer.getData('text/plain');
+                    drop.textContent = draggables[idx].text;
+                    drop.dataset.idx = idx;
+                };
+                dropArea.appendChild(drop);
+            });
+            quizDiv.appendChild(q5);
+            quizDiv.appendChild(dragArea);
+            quizDiv.appendChild(dropArea);
+            // Submit
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'btn';
+            submitBtn.textContent = 'Submit Kuis';
+            submitBtn.onclick = checkFinalQuizVisual;
+            quizDiv.appendChild(submitBtn);
+        }
+
+        // State jawaban kuis visual
+        let quizVisualAnswers = [null,null,null,null,null];
+        function selectQuizAnswer(qIdx, ansIdx, correctIdx) {
+            quizVisualAnswers[qIdx] = ansIdx;
+            // Highlight
+            const quizDiv = document.getElementById('final-quiz');
+            const opts = quizDiv.querySelectorAll('.question')[qIdx].nextElementSibling.querySelectorAll('.option');
+            opts.forEach((btn,i)=>{
+                btn.style.background = i===ansIdx ? '#4cc9f0' : '';
+                btn.style.color = i===ansIdx ? '#fff' : '';
+            });
+        }
+
+        function checkFinalQuizVisual() {
+            let score = 0;
+            // Soal 1-4
+            const corrects = [1,1,1,2];
+            for(let i=0;i<4;i++){
+                if(quizVisualAnswers[i]===corrects[i]) score++;
+            }
+            // Soal 5 drag & drop
+            const quizDiv = document.getElementById('final-quiz');
+            const drops = quizDiv.querySelectorAll('.drop-target');
+            if(drops[0].textContent==='C₄H₁₀' && drops[1].textContent==='C₃H₈') score++;
+            // Tampilkan skor
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-score-display').style.display = 'block';
+            document.getElementById('final-feedback').style.display = 'block';
+        }
+        }
+        
+        // Fungsi untuk update progress bar
+        function updateProgressBar(slideId) {
+            const progress = document.getElementById('progress');
+            progress.style.width = slideProgress[slideId] + '%';
+        }
+        
+        // Fungsi untuk menampilkan info molekul
+        function showMoleculeInfo(molecule) {
+            const infoDiv = document.getElementById('molecule-info');
+            const nameElement = document.getElementById('molecule-name');
+            const formulaElement = document.getElementById('molecule-formula');
+            
+            const moleculeData = {
+                'metana': {
+                    name: 'Metana',
+                    formula: 'CH₄'
+                }
+            };
+            
+            nameElement.textContent = moleculeData[molecule].name;
+            formulaElement.textContent = `Rumus: ${moleculeData[molecule].formula}`;
+            infoDiv.style.display = 'block';
+        }
+        
+        // Fungsi untuk menampilkan detail molekul
+        function showMoleculeDetail(molecule) {
+            const detailDiv = document.getElementById('molecule-detail');
+            const nameElement = document.getElementById('detail-name');
+            const infoElement = document.getElementById('detail-info');
+            
+            const moleculeData = {
+                'metana': {
+                    name: 'Metana',
+                    info: 'Metana adalah alkana paling sederhana dengan satu atom karbon. Digunakan sebagai bahan bakar utama gas alam.'
+                },
+                'etana': {
+                    name: 'Etana',
+                    info: 'Etana memiliki dua atom karbon. Digunakan dalam produksi etilena untuk industri plastik.'
+                },
+                'propana': {
+                    name: 'Propana',
+                    info: 'Propana memiliki tiga atom karbon. Digunakan sebagai bahan bakar LPG untuk memasak dan pemanas.'
+                }
+            };
+            
+            nameElement.textContent = moleculeData[molecule].name;
+            infoElement.textContent = moleculeData[molecule].info;
+            detailDiv.style.display = 'block';
+        }
+        
+        // Fungsi untuk merender molekul eksperimen
+        function renderExperimentMolecule() {
+            const moleculeDiv = document.getElementById('experiment-molecule');
+            moleculeDiv.innerHTML = '';
+            
+            const carbonCount = currentCarbonCount;
+            const hydrogenCount = 2 * carbonCount + 2;
+            
+            // Render atom karbon
+            for (let i = 0; i < carbonCount; i++) {
+                const carbon = document.createElement('div');
+                carbon.className = 'atom carbon-atom';
+                carbon.textContent = 'C';
+                carbon.style.top = '100px';
+                carbon.style.left = `${50 + i * 70}px`;
+                moleculeDiv.appendChild(carbon);
+                
+                // Render ikatan antara atom karbon
+                if (i < carbonCount - 1) {
+                    const bond = document.createElement('div');
+                    bond.className = 'bond';
+                    bond.style.width = '70px';
+                    bond.style.height = '2px';
+                    bond.style.top = '100px';
+                    bond.style.left = `${85 + i * 70}px`;
+                    bond.style.transform = 'rotate(0deg)';
+                    moleculeDiv.appendChild(bond);
+                }
+            }
+            
+            // Render atom hidrogen
+            if (carbonCount === 1) {
+                // Metana - tetrahedral
+                const positions = [
+                    { top: '50px', left: '50px' },
+                    { top: '150px', left: '50px' },
+                    { top: '100px', left: '10px' },
+                    { top: '100px', left: '90px' }
+                ];
+                
+                positions.forEach(pos => {
+                    const hydrogen = document.createElement('div');
+                    hydrogen.className = 'atom hydrogen-atom';
+                    hydrogen.textContent = 'H';
+                    hydrogen.style.top = pos.top;
+                    hydrogen.style.left = pos.left;
+                    moleculeDiv.appendChild(hydrogen);
+                    
+                    // Render ikatan ke hidrogen
+                    const bond = document.createElement('div');
+                    bond.className = 'bond';
+                    bond.style.width = '30px';
+                    bond.style.height = '2px';
+                    bond.style.top = '85px';
+                    bond.style.left = '65px';
+                    bond.style.transform = 'rotate(45deg)';
+                    moleculeDiv.appendChild(bond);
+                });
+            } else {
+                // Alkana dengan lebih dari 1 C
+                for (let i = 0; i < carbonCount; i++) {
+                    // Atom C pertama
+                    if (i === 0) {
+                        const h1 = document.createElement('div');
+                        h1.className = 'atom hydrogen-atom';
+                        h1.textContent = 'H';
+                        h1.style.top = '50px';
+                        h1.style.left = '50px';
+                        moleculeDiv.appendChild(h1);
+                        
+                        const h2 = document.createElement('div');
+                        h2.className = 'atom hydrogen-atom';
+                        h2.textContent = 'H';
+                        h2.style.top = '150px';
+                        h2.style.left = '50px';
+                        moleculeDiv.appendChild(h2);
+                        
+                        const h3 = document.createElement('div');
+                        h3.className = 'atom hydrogen-atom';
+                        h3.textContent = 'H';
+                        h3.style.top = '100px';
+                        h3.style.left = '20px';
+                        moleculeDiv.appendChild(h3);
+                    }
+                    // Atom C terakhir
+                    else if (i === carbonCount - 1) {
+                        const h1 = document.createElement('div');
+                        h1.className = 'atom hydrogen-atom';
+                        h1.textContent = 'H';
+                        h1.style.top = '50px';
+                        h1.style.left = `${50 + i * 70}px`;
+                        moleculeDiv.appendChild(h1);
+                        
+                        const h2 = document.createElement('div');
+                        h2.className = 'atom hydrogen-atom';
+                        h2.textContent = 'H';
+                        h2.style.top = '150px';
+                        h2.style.left = `${50 + i * 70}px`;
+                        moleculeDiv.appendChild(h2);
+                        
+                        const h3 = document.createElement('div');
+                        h3.className = 'atom hydrogen-atom';
+                        h3.textContent = 'H';
+                        h3.style.top = '100px';
+                        h3.style.left = `${80 + i * 70}px`;
+                        moleculeDiv.appendChild(h3);
+                    }
+                    // Atom C di tengah
+                    else {
+                        const h1 = document.createElement('div');
+                        h1.className = 'atom hydrogen-atom';
+                        h1.textContent = 'H';
+                        h1.style.top = '50px';
+                        h1.style.left = `${50 + i * 70}px`;
+                        moleculeDiv.appendChild(h1);
+                        
+                        const h2 = document.createElement('div');
+                        h2.className = 'atom hydrogen-atom';
+                        h2.textContent = 'H';
+                        h2.style.top = '150px';
+                        h2.style.left = `${50 + i * 70}px`;
+                        moleculeDiv.appendChild(h2);
+                    }
+                }
+            }
+            
+            // Update info
+            document.getElementById('carbon-count').textContent = carbonCount;
+            document.getElementById('alkana-name').textContent = `Nama: ${getAlkanaName(carbonCount)}`;
+            document.getElementById('alkana-formula').textContent = `Rumus Molekul: C${carbonCount}H${hydrogenCount}`;
+            document.getElementById('alkana-formula').nextElementSibling.textContent = `Rumus Umum: CₙH₂ₙ₊₂ → C${carbonCount}H${hydrogenCount}`;
+        }
+        
+        // Fungsi untuk mengubah jumlah atom karbon
+        function changeCarbonCount(delta) {
+            currentCarbonCount += delta;
+            if (currentCarbonCount < 1) currentCarbonCount = 1;
+            if (currentCarbonCount > 6) currentCarbonCount = 6;
+            
+            renderExperimentMolecule();
+        }
+        
+        // Fungsi untuk mendapatkan nama alkana berdasarkan jumlah C
+        function getAlkanaName(carbonCount) {
+            const names = ["Metana", "Etana", "Propana", "Butana", "Pentana", "Heksana"];
+            return names[carbonCount - 1] || `Alkana C${carbonCount}`;
+        }
+        
+        // Fungsi untuk memulai level game
+        function startLevel(level) {
+            currentLevel = level;
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = '';
+            
+            // Reset level buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Tampilkan skor
+            document.getElementById('score-display').style.display = 'block';
+            document.getElementById('score').textContent = gameScore;
+            
+            // Render level berdasarkan nomor
+            switch(level) {
+                case 1:
+                    renderLevel1();
+                    break;
+                case 2:
+                    renderLevel2();
+                    break;
+                case 3:
+                    renderLevel3();
+                    break;
+                case 4:
+                    renderLevel4();
+                    break;
+                case 5:
+                    renderLevel5();
+                    break;
+            }
+        }
+        
+        // Fungsi untuk render level 1
+        function renderLevel1() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <h3>Level 1: Susun Rantai Karbon CH₄</h3>
+                <p>Drag atom C dan H ke posisi yang benar untuk membentuk metana.</p>
+                
+                <div class="drag-area">
+                    <div class="drag-item" draggable="true">C</div>
+                    <div class="drag-item" draggable="true">H</div>
+                    <div class="drag-item" draggable="true">H</div>
+                    <div class="drag-item" draggable="true">H</div>
+                    <div class="drag-item" draggable="true">H</div>
+                </div>
+                
+                <div class="drop-area" id="drop-area-1">
+                    <p>Letakkan atom di sini untuk membentuk metana</p>
+                </div>
+                
+                <button class="btn" onclick="checkLevel1()">Periksa</button>
+                <div id="level1-feedback" class="feedback"></div>
+            `;
+            
+            // Inisialisasi drag and drop
+            initDragAndDrop('drop-area-1');
+        }
+        
+        // Fungsi untuk memeriksa level 1
+        function checkLevel1() {
+            const dropArea = document.getElementById('drop-area-1');
+            const feedback = document.getElementById('level1-feedback');
+            
+            if (dropArea.children.length >= 5) {
+                feedback.textContent = 'Benar! Kamu berhasil menyusun metana.';
+                feedback.className = 'feedback correct';
+                gameScore += 10;
+                document.getElementById('score').textContent = gameScore;
+            } else {
+                feedback.textContent = 'Belum benar. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        // Fungsi untuk inisialisasi drag and drop
+        function initDragAndDrop(dropAreaId) {
+            const dragItems = document.querySelectorAll('.drag-item');
+            const dropArea = document.getElementById(dropAreaId);
+            
+            dragItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', e.target.textContent);
+                });
+            });
+            
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+            
+            dropArea.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+            
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                
+                const data = e.dataTransfer.getData('text/plain');
+                const newItem = document.createElement('div');
+                newItem.className = 'drag-item';
+                newItem.textContent = data;
+                newItem.draggable = false;
+                this.appendChild(newItem);
+            });
+        }
+        
+        // Fungsi untuk render level 2
+        function renderLevel2() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <h3>Level 2: Susun Rantai Karbon C₂H₆</h3>
+                <p>Klik tombol di bawah untuk menambah atom C dan lihat bagaimana H otomatis bertambah.</p>
+                
+                <div class="visual-builder">
+                    <div class="molecule-builder" id="level2-molecule">
+                        <div class="atom carbon-atom" style="top: 100px; left: 100px;">C</div>
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 100px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 100px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 100px; left: 60px;">H</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="addCarbonLevel2()">Tambah 1 C</button>
+                <div id="level2-feedback" class="feedback"></div>
+            `;
+        }
+        
+        // Fungsi untuk menambah atom C di level 2
+        function addCarbonLevel2() {
+            const molecule = document.getElementById('level2-molecule');
+            const feedback = document.getElementById('level2-feedback');
+            
+            // Tambah atom C baru
+            const newCarbon = document.createElement('div');
+            newCarbon.className = 'atom carbon-atom';
+            newCarbon.textContent = 'C';
+            newCarbon.style.top = '100px';
+            newCarbon.style.left = '170px';
+            molecule.appendChild(newCarbon);
+            
+            // Tambah ikatan
+            const bond = document.createElement('div');
+            bond.className = 'bond';
+            bond.style.width = '70px';
+            bond.style.height = '2px';
+            bond.style.top = '100px';
+            bond.style.left = '135px';
+            bond.style.transform = 'rotate(0deg)';
+            molecule.appendChild(bond);
+            
+            // Tambah atom H baru
+            const newHydrogen1 = document.createElement('div');
+            newHydrogen1.className = 'atom hydrogen-atom';
+            newHydrogen1.textContent = 'H';
+            newHydrogen1.style.top = '50px';
+            newHydrogen1.style.left = '170px';
+            molecule.appendChild(newHydrogen1);
+            
+            const newHydrogen2 = document.createElement('div');
+            newHydrogen2.className = 'atom hydrogen-atom';
+            newHydrogen2.textContent = 'H';
+            newHydrogen2.style.top = '150px';
+            newHydrogen2.style.left = '170px';
+            molecule.appendChild(newHydrogen2);
+            
+            const newHydrogen3 = document.createElement('div');
+            newHydrogen3.className = 'atom hydrogen-atom';
+            newHydrogen3.textContent = 'H';
+            newHydrogen3.style.top = '100px';
+            newHydrogen3.style.left = '210px';
+            molecule.appendChild(newHydrogen3);
+            
+            feedback.textContent = 'Benar! Sekarang kamu punya etana (C₂H₆).';
+            feedback.className = 'feedback correct';
+            gameScore += 10;
+            document.getElementById('score').textContent = gameScore;
+        }
+        
+        // Fungsi untuk render level 3-5 (disederhanakan)
+        function renderLevel3() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <h3>Level 3: Tentukan Rumus Molekul</h3>
+                <p>Diketahui rantai 3C, tentukan rumus molekulnya.</p>
+                
+                <div class="visual-builder">
+                    <div class="molecule-builder">
+                        <div class="atom carbon-atom" style="top: 100px; left: 50px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 120px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 190px;">C</div>
+                        
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 85px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 155px; transform: rotate(0deg);"></div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 50px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 50px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 100px; left: 20px;">H</div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 120px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 120px;">H</div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 190px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 190px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 100px; left: 220px;">H</div>
+                    </div>
+                </div>
+                
+                <div class="options">
+                    <div class="option" onclick="checkLevel3Answer(0)">C₃H₆</div>
+                    <div class="option" onclick="checkLevel3Answer(1)">C₃H₈</div>
+                    <div class="option" onclick="checkLevel3Answer(2)">C₃H₁₀</div>
+                </div>
+                
+                <div id="level3-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkLevel3Answer(answer) {
+            const feedback = document.getElementById('level3-feedback');
+            
+            if (answer === 1) {
+                feedback.textContent = 'Benar! Propana memiliki rumus C₃H₈.';
+                feedback.className = 'feedback correct';
+                gameScore += 10;
+                document.getElementById('score').textContent = gameScore;
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderLevel4() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <h3>Level 4: Tentukan Nama Senyawa</h3>
+                <p>Diketahui rumus C₄H₁₀, tentukan nama senyawanya.</p>
+                
+                <div class="visual-builder">
+                    <div class="molecule-builder">
+                        <div class="atom carbon-atom" style="top: 100px; left: 30px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 100px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 170px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 240px;">C</div>
+                        
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 65px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 135px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 205px; transform: rotate(0deg);"></div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 30px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 30px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 100px; left: 0px;">H</div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 100px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 100px;">H</div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 170px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 170px;">H</div>
+                        
+                        <div class="atom hydrogen-atom" style="top: 50px; left: 240px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 150px; left: 240px;">H</div>
+                        <div class="atom hydrogen-atom" style="top: 100px; left: 270px;">H</div>
+                    </div>
+                </div>
+                
+                <div class="options">
+                    <div class="option" onclick="checkLevel4Answer(0)">Metana</div>
+                    <div class="option" onclick="checkLevel4Answer(1)">Etana</div>
+                    <div class="option" onclick="checkLevel4Answer(2)">Propana</div>
+                    <div class="option" onclick="checkLevel4Answer(3)">Butana</div>
+                </div>
+                
+                <div id="level4-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkLevel4Answer(answer) {
+            const feedback = document.getElementById('level4-feedback');
+            
+            if (answer === 3) {
+                feedback.textContent = 'Benar! C₄H₁₀ adalah butana.';
+                feedback.className = 'feedback correct';
+                gameScore += 10;
+                document.getElementById('score').textContent = gameScore;
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderLevel5() {
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <h3>Level 5: Campuran Tantangan</h3>
+                <p>Jawab pertanyaan berikut untuk menyelesaikan level ini.</p>
+                
+                <div class="quiz-container">
+                    <div class="quiz-question">
+                        <p>Berapa jumlah atom H dalam C₂H₆?</p>
+                        <div class="options">
+                            <div class="option" onclick="checkLevel5Answer(0, 0)">4</div>
+                            <div class="option" onclick="checkLevel5Answer(1, 0)">6</div>
+                            <div class="option" onclick="checkLevel5Answer(2, 0)">8</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <p>Apa nama senyawa dengan rumus CH₄?</p>
+                        <div class="options">
+                            <div class="option" onclick="checkLevel5Answer(0, 1)">Metana</div>
+                            <div class="option" onclick="checkLevel5Answer(1, 1)">Etana</div>
+                            <div class="option" onclick="checkLevel5Answer(2, 1)">Propana</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="level5-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkLevel5Answer(answer, question) {
+            const feedback = document.getElementById('level5-feedback');
+            const correctAnswers = [1, 0]; // Indeks jawaban benar untuk setiap pertanyaan
+            
+            if (answer === correctAnswers[question]) {
+                feedback.textContent = 'Benar!';
+                feedback.className = 'feedback correct';
+                gameScore += 10;
+                document.getElementById('score').textContent = gameScore;
+                
+                // Jika semua pertanyaan dijawab dengan benar
+                if (gameScore >= 50) {
+                    setTimeout(() => {
+                        feedback.innerHTML += '<p class="badge">Master of Straight Chain Alkanes</p>';
+                    }, 1000);
+                }
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        // Fungsi untuk menampilkan kesimpulan
+        function showConclusion() {
+            document.getElementById('conclusion').style.display = 'block';
+        }
+        
+        // Fungsi untuk menampilkan info alkana bercabang
+        function showBranchedInfo(alkana) {
+            const infoDiv = document.getElementById('branched-info');
+            const nameElement = document.getElementById('branched-name');
+            const detailElement = document.getElementById('branched-detail');
+            
+            const alkanaData = {
+                'metilpropana': {
+                    name: 'Metilpropana',
+                    detail: 'Metilpropana adalah alkana bercabang dengan 4 atom karbon. Memiliki cabang metil pada atom karbon nomor 2.'
+                },
+                'etilbutana': {
+                    name: 'Etilbutana',
+                    detail: 'Etilbutana adalah alkana bercabang dengan 6 atom karbon. Memiliki cabang etil pada rantai utama butana.'
+                }
+            };
+            
+            nameElement.textContent = alkanaData[alkana].name;
+            detailElement.textContent = alkanaData[alkana].detail;
+            infoDiv.style.display = 'block';
+        }
+        
+        // Fungsi untuk merender molekul bercabang eksperimen
+        function renderBranchedExperimentMolecule() {
+            const moleculeDiv = document.getElementById('branched-experiment');
+            moleculeDiv.innerHTML = '';
+            
+            const mainChain = currentBranchedCarbon.main;
+            const branches = currentBranchedCarbon.branches;
+            
+            // Render atom karbon utama
+            for (let i = 0; i < mainChain; i++) {
+                const carbon = document.createElement('div');
+                carbon.className = 'atom carbon-atom';
+                carbon.textContent = 'C';
+                carbon.style.top = '100px';
+                carbon.style.left = `${50 + i * 70}px`;
+                moleculeDiv.appendChild(carbon);
+                
+                // Render ikatan antara atom karbon utama
+                if (i < mainChain - 1) {
+                    const bond = document.createElement('div');
+                    bond.className = 'bond';
+                    bond.style.width = '70px';
+                    bond.style.height = '2px';
+                    bond.style.top = '100px';
+                    bond.style.left = `${85 + i * 70}px`;
+                    bond.style.transform = 'rotate(0deg)';
+                    moleculeDiv.appendChild(bond);
+                }
+            }
+            
+            // Render cabang
+            if (branches > 0) {
+                const branchCarbon = document.createElement('div');
+                branchCarbon.className = 'atom carbon-atom';
+                branchCarbon.textContent = 'C';
+                branchCarbon.style.top = '50px';
+                branchCarbon.style.left = '120px';
+                moleculeDiv.appendChild(branchCarbon);
+                
+                const branchBond = document.createElement('div');
+                branchBond.className = 'bond';
+                branchBond.style.width = '50px';
+                branchBond.style.height = '2px';
+                branchBond.style.top = '75px';
+                branchBond.style.left = '120px';
+                branchBond.style.transform = 'rotate(90deg)';
+                moleculeDiv.appendChild(branchBond);
+                
+                // Tambah hidrogen pada cabang
+                const h1 = document.createElement('div');
+                h1.className = 'atom hydrogen-atom';
+                h1.textContent = 'H';
+                h1.style.top = '30px';
+                h1.style.left = '100px';
+                moleculeDiv.appendChild(h1);
+                
+                const h2 = document.createElement('div');
+                h2.className = 'atom hydrogen-atom';
+                h2.textContent = 'H';
+                h2.style.top = '30px';
+                h2.style.left = '140px';
+                moleculeDiv.appendChild(h2);
+                
+                const h3 = document.createElement('div');
+                h3.className = 'atom hydrogen-atom';
+                h3.textContent = 'H';
+                h3.style.top = '70px';
+                h3.style.left = '120px';
+                moleculeDiv.appendChild(h3);
+            }
+            
+            // Update info
+            document.getElementById('branched-alkana-name').textContent = `Nama: ${getBranchedAlkanaName(mainChain, branches)}`;
+            document.getElementById('branched-alkana-formula').textContent = `Rumus Molekul: C${mainChain + branches}H${2*(mainChain + branches) + 2}`;
+        }
+        
+        // Fungsi untuk mengubah molekul bercabang
+        function changeBranchedCarbon(type, delta) {
+            if (type === 'main') {
+                currentBranchedCarbon.main += delta;
+                if (currentBranchedCarbon.main < 3) currentBranchedCarbon.main = 3;
+                if (currentBranchedCarbon.main > 6) currentBranchedCarbon.main = 6;
+            } else if (type === 'branch') {
+                currentBranchedCarbon.branches += delta;
+                if (currentBranchedCarbon.branches < 0) currentBranchedCarbon.branches = 0;
+                if (currentBranchedCarbon.branches > 2) currentBranchedCarbon.branches = 2;
+            }
+            
+            renderBranchedExperimentMolecule();
+        }
+        
+        // Fungsi untuk mendapatkan nama alkana bercabang
+        function getBranchedAlkanaName(mainChain, branches) {
+            if (branches === 0) {
+                return getAlkanaName(mainChain);
+            } else if (mainChain === 4 && branches === 1) {
+                return "2-metilpropana";
+            } else if (mainChain === 5 && branches === 1) {
+                return "2-metilbutana";
+            } else {
+                return `Alkana bercabang C${mainChain + branches}`;
+            }
+        }
+        
+        // Fungsi untuk memulai level alkana bercabang
+        function startBranchedLevel(level) {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = '';
+            
+            // Reset level buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Tampilkan skor
+            document.getElementById('branched-score-display').style.display = 'block';
+            document.getElementById('branched-score').textContent = branchedGameScore;
+            
+            // Render level berdasarkan nomor
+            switch(level) {
+                case 1:
+                    renderBranchedLevel1();
+                    break;
+                case 2:
+                    renderBranchedLevel2();
+                    break;
+                case 3:
+                    renderBranchedLevel3();
+                    break;
+                case 4:
+                    renderBranchedLevel4();
+                    break;
+                case 5:
+                    renderBranchedLevel5();
+                    break;
+            }
+        }
+        
+        // Fungsi untuk render level bercabang 1-5 (disederhanakan)
+        function renderBranchedLevel1() {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = `
+                <h3>Level 1: Tentukan Rumus Molekul Bercabang</h3>
+                <p>Tampilkan struktur bercabang → siswa tentukan rumusnya.</p>
+                
+                <div class="visual-builder">
+                    <div class="molecule-builder">
+                        <div class="atom carbon-atom" style="top: 100px; left: 50px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 120px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 190px;">C</div>
+                        <div class="atom carbon-atom" style="top: 50px; left: 120px;">C</div>
+                        
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 85px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 155px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 50px; height: 2px; top: 75px; left: 120px; transform: rotate(90deg);"></div>
+                    </div>
+                </div>
+                
+                <div class="options">
+                    <div class="option" onclick="checkBranchedLevel1Answer(0)">C₃H₈</div>
+                    <div class="option" onclick="checkBranchedLevel1Answer(1)">C₄H₁₀</div>
+                    <div class="option" onclick="checkBranchedLevel1Answer(2)">C₄H₈</div>
+                </div>
+                
+                <div id="branched-level1-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkBranchedLevel1Answer(answer) {
+            const feedback = document.getElementById('branched-level1-feedback');
+            
+            if (answer === 1) {
+                feedback.textContent = 'Benar! Struktur tersebut adalah metilpropana dengan rumus C₄H₁₀.';
+                feedback.className = 'feedback correct';
+                branchedGameScore += 10;
+                document.getElementById('branched-score').textContent = branchedGameScore;
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderBranchedLevel2() {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = `
+                <h3>Level 2: Susun Cabang</h3>
+                <p>Diketahui rumus C₄H₁₀ → susun cabangnya di posisi yang benar.</p>
+                
+                <div class="drag-area">
+                    <div class="drag-item" draggable="true">Cabang Metil</div>
+                </div>
+                
+                <div class="drop-area" id="drop-area-branched">
+                    <p>Letakkan cabang di sini</p>
+                    <div class="visual-builder">
+                        <div class="molecule-builder">
+                            <div class="atom carbon-atom" style="top: 100px; left: 50px;">1</div>
+                            <div class="atom carbon-atom" style="top: 100px; left: 120px;">2</div>
+                            <div class="atom carbon-atom" style="top: 100px; left: 190px;">3</div>
+                            
+                            <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 85px; transform: rotate(0deg);"></div>
+                            <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 155px; transform: rotate(0deg);"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="checkBranchedLevel2()">Periksa</button>
+                <div id="branched-level2-feedback" class="feedback"></div>
+            `;
+            
+            // Inisialisasi drag and drop
+            initDragAndDrop('drop-area-branched');
+        }
+        
+        function checkBranchedLevel2() {
+            const dropArea = document.getElementById('drop-area-branched');
+            const feedback = document.getElementById('branched-level2-feedback');
+            
+            if (dropArea.children.length > 1) {
+                feedback.textContent = 'Benar! Cabang metil ditempatkan dengan benar.';
+                feedback.className = 'feedback correct';
+                branchedGameScore += 10;
+                document.getElementById('branched-score').textContent = branchedGameScore;
+            } else {
+                feedback.textContent = 'Belum benar. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderBranchedLevel3() {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = `
+                <h3>Level 3: Tentukan Nama Alkana Bercabang</h3>
+                <p>Diketahui struktur → tentukan nama (misal: 2-metilpropana).</p>
+                
+                <div class="visual-builder">
+                    <div class="molecule-builder">
+                        <div class="atom carbon-atom" style="top: 100px; left: 50px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 120px;">C</div>
+                        <div class="atom carbon-atom" style="top: 100px; left: 190px;">C</div>
+                        <div class="atom carbon-atom" style="top: 50px; left: 120px;">C</div>
+                        
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 85px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 70px; height: 2px; top: 100px; left: 155px; transform: rotate(0deg);"></div>
+                        <div class="bond" style="width: 50px; height: 2px; top: 75px; left: 120px; transform: rotate(90deg);"></div>
+                    </div>
+                </div>
+                
+                <div class="options">
+                    <div class="option" onclick="checkBranchedLevel3Answer(0)">Metana</div>
+                    <div class="option" onclick="checkBranchedLevel3Answer(1)">Propana</div>
+                    <div class="option" onclick="checkBranchedLevel3Answer(2)">2-metilpropana</div>
+                    <div class="option" onclick="checkBranchedLevel3Answer(3)">Butana</div>
+                </div>
+                
+                <div id="branched-level3-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkBranchedLevel3Answer(answer) {
+            const feedback = document.getElementById('branched-level3-feedback');
+            
+            if (answer === 2) {
+                feedback.textContent = 'Benar! Struktur tersebut adalah 2-metilpropana.';
+                feedback.className = 'feedback correct';
+                branchedGameScore += 10;
+                document.getElementById('branched-score').textContent = branchedGameScore;
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderBranchedLevel4() {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = `
+                <h3>Level 4: Buat Struktur dari Nama</h3>
+                <p>Diketahui nama 2-metilpropana → buat strukturnya.</p>
+                
+                <div class="drag-area">
+                    <div class="drag-item" draggable="true">C</div>
+                    <div class="drag-item" draggable="true">C</div>
+                    <div class="drag-item" draggable="true">C</div>
+                    <div class="drag-item" draggable="true">C</div>
+                </div>
+                
+                <div class="drop-area" id="drop-area-branched4">
+                    <p>Buat struktur 2-metilpropana di sini</p>
+                </div>
+                
+                <button class="btn" onclick="checkBranchedLevel4()">Periksa</button>
+                <div id="branched-level4-feedback" class="feedback"></div>
+            `;
+            
+            // Inisialisasi drag and drop
+            initDragAndDrop('drop-area-branched4');
+        }
+        
+        function checkBranchedLevel4() {
+            const dropArea = document.getElementById('drop-area-branched4');
+            const feedback = document.getElementById('branched-level4-feedback');
+            
+            if (dropArea.children.length >= 4) {
+                feedback.textContent = 'Benar! Kamu berhasil membuat struktur 2-metilpropana.';
+                feedback.className = 'feedback correct';
+                branchedGameScore += 10;
+                document.getElementById('branched-score').textContent = branchedGameScore;
+            } else {
+                feedback.textContent = 'Belum benar. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function renderBranchedLevel5() {
+            const gameArea = document.getElementById('branched-game-area');
+            gameArea.innerHTML = `
+                <h3>Level 5: Kuis Cepat Alkana Bercabang</h3>
+                <p>Jawab 3 soal acak tentang alkana bercabang.</p>
+                
+                <div class="quiz-container">
+                    <div class="quiz-question">
+                        <p>Apa nama senyawa dengan struktur cabang metil pada C nomor 2 dari propana?</p>
+                        <div class="options">
+                            <div class="option" onclick="checkBranchedLevel5Answer(0, 0)">Metilpropana</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(1, 0)">2-metilpropana</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(2, 0)">3-metilpropana</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <p>Berapa atom karbon dalam 2-metilbutana?</p>
+                        <div class="options">
+                            <div class="option" onclick="checkBranchedLevel5Answer(0, 1)">4</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(1, 1)">5</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(2, 1)">6</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <p>Manakah yang merupakan alkana bercabang?</p>
+                        <div class="options">
+                            <div class="option" onclick="checkBranchedLevel5Answer(0, 2)">Metana</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(1, 2)">Etana</div>
+                            <div class="option" onclick="checkBranchedLevel5Answer(2, 2)">2-metilpropana</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="branched-level5-feedback" class="feedback"></div>
+            `;
+        }
+        
+        function checkBranchedLevel5Answer(answer, question) {
+            const feedback = document.getElementById('branched-level5-feedback');
+            const correctAnswers = [1, 1, 2]; // Indeks jawaban benar untuk setiap pertanyaan
+            
+            if (answer === correctAnswers[question]) {
+                feedback.textContent = 'Benar!';
+                feedback.className = 'feedback correct';
+                branchedGameScore += 10;
+                document.getElementById('branched-score').textContent = branchedGameScore;
+                
+                // Jika semua pertanyaan dijawab dengan benar
+                if (branchedGameScore >= 50) {
+                    setTimeout(() => {
+                        feedback.innerHTML += '<p class="badge">Master of Branched Alkanes</p>';
+                    }, 1000);
+                }
+            } else {
+                feedback.textContent = 'Salah. Coba lagi!';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        // Fungsi untuk menampilkan kesimpulan alkana bercabang
+        function showBranchedConclusion() {
+            document.getElementById('branched-conclusion').style.display = 'block';
+        }
+        
+        // Fungsi untuk merender kuis akhir
+        function renderFinalQuiz() {
+            const quizContainer = document.getElementById('final-quiz');
+            quizContainer.innerHTML = '';
+            
+            currentQuizQuestion = 0;
+            finalScore = 0;
+            
+            renderQuizQuestion();
+        }
+        
+        // Fungsi untuk merender pertanyaan kuis
+        function renderQuizQuestion() {
+            const quizContainer = document.getElementById('final-quiz');
+            
+            if (currentQuizQuestion < finalQuiz.length) {
+                const question = finalQuiz[currentQuizQuestion];
+                
+                quizContainer.innerHTML = `
+                    <div class="quiz-question">
+                        <h3>Soal ${currentQuizQuestion + 1}: ${question.question}</h3>
+                        <div class="options">
+                            ${question.options.map((option, index) => `
+                                <div class="option" onclick="checkFinalAnswer(${index})">${option}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div id="final-quiz-feedback" class="feedback"></div>
+                `;
+            } else {
+                // Kuis selesai
+                quizContainer.innerHTML = `
+                    <h3>Kuis Selesai!</h3>
+                    <p>Kamu telah menyelesaikan semua soal.</p>
+                `;
+                
+                document.getElementById('final-score-display').style.display = 'block';
+                document.getElementById('final-score').textContent = finalScore;
+                
+                if (finalScore >= 4) {
+                    document.getElementById('final-feedback').style.display = 'block';
+                }
+            }
+        }
+        
+        // Fungsi untuk memeriksa jawaban kuis akhir
+        function checkFinalAnswer(answer) {
+            const feedback = document.getElementById('final-quiz-feedback');
+            const question = finalQuiz[currentQuizQuestion];
+            
+            if (answer === question.correct) {
+                feedback.textContent = 'Benar!';
+                feedback.className = 'feedback correct';
+                finalScore++;
+            } else {
+                feedback.textContent = `Salah. Jawaban yang benar adalah: ${question.options[question.correct]}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            setTimeout(() => {
+                currentQuizQuestion++;
+                renderQuizQuestion();
+            }, 1500);
+        }
+        
+        // Fungsi untuk menyelesaikan petualangan
+        function finishAdventure() {
+            document.getElementById('final-message').style.display = 'block';
+        }
+        
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render molekul eksperimen awal
+            renderExperimentMolecule();
+            renderBranchedExperimentMolecule();
+        });
+    </script>
+</body>
+</html>
